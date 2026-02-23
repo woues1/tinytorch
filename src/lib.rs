@@ -4,3 +4,5 @@ pub mod activations;
 pub mod reductions;
 pub mod tensor;
 pub use tensor::Tensor;
+#[cfg(test)]
+pub mod tests;
