@@ -9,8 +9,10 @@ pub struct Linear {
 impl Linear {
     pub fn new(in_features: usize, out_features: usize, use_bias: bool) -> Self {
         // 1. Initialize random weights [IN, OUT]
-        let weight = Tensor::random(vec![in_features, out_features]);
+        let weight = Tensor::randn(vec![in_features, out_features]);
 
+        let scale = (1.0 / in_features as f32).sqrt();
+        let weight = weight.mul_scalar(scale);
         // 2. Initialize biases to zero [1, OUT] if requested
         let bias = if use_bias {
             Some(Tensor::zeros(vec![1, out_features]))
@@ -31,5 +33,15 @@ impl Linear {
         }
 
         output
+    }
+    pub fn parameters(&mut self) -> Vec<&mut Tensor<f32>> {
+        let mut params = Vec::new();
+
+        params.push(&mut self.weight);
+
+        if let Some(b) = &mut self.bias {
+            params.push(b);
+        }
+        params
     }
 }

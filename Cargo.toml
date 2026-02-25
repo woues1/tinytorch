@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 num-traits = "0.2.19"
 rand = "0.10.0"
+rand_distr = "0.6.0"
 
 [profile.release]
 opt-level = 'z'     # Optimize for size

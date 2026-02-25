@@ -1,5 +1,4 @@
-use num_traits::{Float, FromPrimitive};
-use rand::RngExt;
+use num_traits::Float;
 use std::ops::{Add, Mul};
 #[derive(Debug, Clone)]
 pub struct Tensor<T> {
@@ -190,39 +189,18 @@ impl<T> Tensor<T> {
             strides: new_strides,
         }
     }
-}
 
-impl<T> Tensor<T>
-where
-    // T must be a Float, be convertible from f32, be sampleable by rand, and be clonable
-    T: Float + FromPrimitive + rand::distr::uniform::SampleUniform + Clone,
-{
-    /// Creates a new tensor filled with random values between -0.1 and 0.1
-    pub fn random(shape: Vec<usize>) -> Self {
-        let total_elements: usize = shape.iter().product();
-        let mut rng = rand::rng();
+    pub fn mul_scalar(self, scalar: T) -> Self
+    where
+        T: Float,
+    {
+        let new_data = self.data.into_iter().map(|a| a * scalar).collect();
 
-        // Convert our f32 bounds safely into the generic type T
-        let low = T::from_f32(-0.5).expect("Failed to convert lower bound");
-        let high = T::from_f32(0.5).expect("Failed to convert upper bound");
-
-        // Generate a flat Vec of random floats of type T
-        let data: Vec<T> = (0..total_elements)
-            .map(|_| rng.random_range(low..high))
-            .collect();
-
-        // Use your existing constructor which handles the strides!
-        Tensor::new(data, shape).unwrap()
-    }
-
-    /// Creates a new tensor filled entirely with zeros
-    pub fn zeros(shape: Vec<usize>) -> Self {
-        let total_elements: usize = shape.iter().product();
-
-        // Use T::zero() instead of hardcoding 0.0
-        let data = vec![T::zero(); total_elements];
-
-        Tensor::new(data, shape).unwrap()
+        Tensor {
+            data: new_data,
+            shape: self.shape,
+            strides: self.strides,
+        }
     }
 }
 
