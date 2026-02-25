@@ -5,3 +5,11 @@ edition = "2024"
 
 [dependencies]
 num-traits = "0.2.19"
+rand = "0.10.0"
+
+[profile.release]
+opt-level = 'z'     # Optimize for size
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce parallel code generation units for better optimization
+panic = 'abort'     # Remove stack unwinding code
+strip = true        # Strip symbols (requires Rust 1.59+)
