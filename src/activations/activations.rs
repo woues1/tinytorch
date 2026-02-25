@@ -1,4 +1,4 @@
-use crate::Tensor;
+use crate::tensor::Tensor;
 use num_traits::Float;
 
 impl<T> Tensor<T>

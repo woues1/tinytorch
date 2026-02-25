@@ -1,5 +1,5 @@
-use crate::Tensor;
-use crate::layers::MLP;
+use crate::nn::MLP;
+use crate::tensor::Tensor;
 mod tests {
     use super::*;
 

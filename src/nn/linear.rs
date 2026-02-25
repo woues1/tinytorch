@@ -1,4 +1,4 @@
-use crate::tensor::Tensor;
+use crate::tensor::tensor::Tensor;
 
 pub struct Linear {
     // Keeping it specific to f32 for simplicity right now

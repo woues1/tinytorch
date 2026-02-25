@@ -1,4 +1,4 @@
-use crate::layers::Linear;
+use crate::nn::Linear;
 mod tests {
     use super::*;
     use crate::tensor::Tensor; // Adjust if your import path is different

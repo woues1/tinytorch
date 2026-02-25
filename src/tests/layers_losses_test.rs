@@ -1,6 +1,7 @@
-use crate::Tensor;
-use crate::layers::losses::mse_loss;
+use crate::losses::mse::mse_loss;
+use crate::tensor::Tensor;
 mod tests {
+
     use super::*;
 
     #[test]

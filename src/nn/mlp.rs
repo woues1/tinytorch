@@ -1,4 +1,4 @@
-use crate::layers::Linear;
+use crate::nn::Linear;
 use crate::tensor::Tensor;
 
 pub struct MLP {

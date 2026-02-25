@@ -1,4 +1,4 @@
-use crate::Tensor;
+use crate::tensor::Tensor;
 use num_traits::{Float, FromPrimitive};
 
 impl<T> Tensor<T>
