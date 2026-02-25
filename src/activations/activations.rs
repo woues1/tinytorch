@@ -1,9 +1,11 @@
+use std::ops::AddAssign;
+
 use crate::tensor::Tensor;
-use num_traits::Float;
+use num_traits::{Float, FromPrimitive};
 
 impl<T> Tensor<T>
 where
-    T: Float,
+    T: Float + FromPrimitive + AddAssign + Default,
 {
     pub fn relu(mut self) -> Self {
         let zero = T::zero();
@@ -25,6 +27,36 @@ where
         for val in self.data.iter_mut() {
             *val = val.tanh();
         }
+        self
+    }
+
+    pub fn softmax(&self, dim: usize) -> Self {
+        let max_vals = self.max_dim(dim);
+
+        let shifted = self.clone() - max_vals;
+
+        let exp_vals = shifted.exp();
+
+        let sum_exp = exp_vals.sum_dim(dim);
+
+        exp_vals / sum_exp
+    }
+
+    pub fn gelu(mut self) -> Self {
+        let half = T::from_f32(0.5).unwrap();
+        let sqrt_2_over_pi = T::from_f32(0.7978845608).unwrap();
+        let coef = T::from_f32(0.044715).unwrap();
+        let one = T::one();
+
+        for val in self.data.iter_mut() {
+            let x = *val;
+            let x_cubed = x * x * x;
+
+            let inner = sqrt_2_over_pi * (x + coef * x_cubed);
+
+            *val = half * x * (one + inner.tanh());
+        }
+
         self
     }
 }
