@@ -1,5 +1,3 @@
 mod activations_test;
-mod layers_losses_test;
-mod layers_mlp_test;
-mod nn_linear_test;
+mod nn_tests;
 mod tensor_tests;

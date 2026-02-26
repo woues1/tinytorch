@@ -1,6 +1,12 @@
-pub mod linear; // filename
-pub use linear::Linear; // filename/struct name
-pub mod mlp;
-pub use mlp::MLP;
+// filename
+pub mod linear;
+// filename/struct name
 pub mod dropout;
+pub mod layer;
+pub mod mlp;
+pub mod sequential;
 pub use dropout::Dropout;
+pub use layer::Layer;
+pub use linear::Linear;
+pub use mlp::MLP;
+pub use sequential::Sequential;

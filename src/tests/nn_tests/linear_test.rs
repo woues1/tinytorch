@@ -1,7 +1,7 @@
 use crate::nn::Linear;
 mod tests {
     use super::*;
-    use crate::tensor::Tensor; // Adjust if your import path is different
+    use crate::{nn::Layer, tensor::Tensor}; // Adjust if your import path is different
 
     #[test]
     fn test_linear_forward() {
@@ -22,7 +22,7 @@ mod tests {
 
         // 3. Run the forward pass!
         // Mathematically: ( [4, 3] @ [3, 5] ) + [1, 5]
-        let output = layer.forward(&input);
+        let output = layer.forward(&input, false);
 
         // 4. Print the shapes to visually confirm the broadcasting and matmul
         println!("\n=== Linear Layer Forward Pass ===");

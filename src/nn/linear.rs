@@ -1,46 +1,62 @@
+use num_traits::{Float, FromPrimitive};
+use rand_distr::StandardNormal;
+
+use crate::nn::layer::Layer;
 use crate::tensor::tensor::Tensor;
 
-pub struct Linear {
-    // Keeping it specific to f32 for simplicity right now
-    pub weight: Tensor<f32>,
-    pub bias: Option<Tensor<f32>>,
+pub struct Linear<T> {
+    pub weight: Tensor<T>,
+    pub bias: Option<Tensor<T>>,
 }
 
-impl Linear {
-    pub fn new(in_features: usize, out_features: usize, use_bias: bool) -> Self {
-        // 1. Initialize random weights [IN, OUT]
-        let weight = Tensor::randn(vec![in_features, out_features]);
-
+impl<T> Linear<T>
+where
+    T: Copy + Default + From<f32> + std::ops::Mul<Output = T> + std::ops::Add<Output = T>,
+    T: Float + FromPrimitive,
+    StandardNormal: rand_distr::Distribution<T>,
+{
+    pub fn new(in_features: usize, out_features: usize, use_bias: bool) -> Self
+    where
+        Tensor<T>: From<Tensor<f32>>,
+    {
+        // 1. Initialize random weights and scale them
         let scale = (1.0 / in_features as f32).sqrt();
-        let weight = weight.mul_scalar(scale);
-        // 2. Initialize biases to zero [1, OUT] if requested
+        let weight_f32 = Tensor::<f32>::randn(vec![in_features, out_features]).mul_scalar(scale);
+
+        // Convert to our generic type T
+        let weight = Tensor::<T>::from(weight_f32);
+
+        // 2. Initialize biases to zero if requested
         let bias = if use_bias {
-            Some(Tensor::zeros(vec![1, out_features]))
+            Some(Tensor::<T>::zeros(vec![1, out_features]))
         } else {
             None
         };
 
         Self { weight, bias }
     }
+}
 
-    pub fn forward(&self, input: &Tensor<f32>) -> Tensor<f32> {
+impl<T> Layer<T> for Linear<T>
+where
+    T: Copy + Default + std::ops::Mul<Output = T> + std::ops::Add<Output = T>,
+{
+    fn forward(&self, input: &Tensor<T>, _is_training: bool) -> Tensor<T> {
         // x @ W
         let mut output = input.clone().matmul(self.weight.clone());
 
-        // + b
         if let Some(bias) = &self.bias {
             output = output + bias.clone();
         }
 
         output
     }
-    pub fn parameters(&mut self) -> Vec<&mut Tensor<f32>> {
+
+    fn parameters(&self) -> Vec<Tensor<T>> {
         let mut params = Vec::new();
-
-        params.push(&mut self.weight);
-
-        if let Some(b) = &mut self.bias {
-            params.push(b);
+        params.push(self.weight.clone());
+        if let Some(b) = &self.bias {
+            params.push(b.clone());
         }
         params
     }
