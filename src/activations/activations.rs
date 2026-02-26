@@ -1,7 +1,7 @@
 use std::ops::AddAssign;
 
 use crate::tensor::Tensor;
-use num_traits::{Float, FromPrimitive};
+use num_traits::{Float, FromPrimitive, real::Real};
 
 impl<T> Tensor<T>
 where
@@ -40,6 +40,20 @@ where
         let sum_exp = exp_vals.sum_dim(dim);
 
         exp_vals / sum_exp
+    }
+
+    pub fn log_softmax(&self, dim: usize) -> Self
+    where
+        Tensor<T>: Real,
+    {
+        let max_vals = self.max_dim(dim);
+        let shifted = self.clone() - max_vals;
+
+        let exp_vals = shifted.clone().exp();
+        let sum_exp = exp_vals.sum_dim(dim);
+        let log_sum_exp = sum_exp.ln();
+
+        shifted - log_sum_exp
     }
 
     pub fn gelu(mut self) -> Self {
