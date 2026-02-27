@@ -1,5 +1,7 @@
 use std::sync::{Arc, RwLock};
 
+use crate::ops::NegBackward;
+
 pub trait BackwardOp<T>: Send + Sync {
     fn backward(&self, grad_output: &Tensor<T>);
 }
@@ -22,6 +24,7 @@ pub trait TensorType:
     + std::ops::Sub<Output = Self>
     + std::ops::Mul<Output = Self>
     + std::ops::Div<Output = Self>
+    + std::ops::Neg<Output = Self>
     + 'static
 {
 }
@@ -35,6 +38,7 @@ impl<T> TensorType for T where
         + std::ops::Sub<Output = Self>
         + std::ops::Mul<Output = Self>
         + std::ops::Div<Output = Self>
+        + std::ops::Neg<Output = Self>
         + 'static
 {
 }
@@ -316,40 +320,55 @@ impl<T> Tensor<T> {
     where
         T: num_traits::Float,
     {
-        // 1. Acquire the read lock
         let inner = self.inner.read().unwrap();
 
-        // 2. Iterate over references to avoid consuming the original data
         let new_data: Vec<T> = inner.data.iter().map(|&a| a * scalar).collect();
 
-        // 3. Clone the shape to pass to the constructor
         let new_shape = inner.shape.clone();
 
-        // 4. Drop the lock early (good concurrency practice)
         drop(inner);
 
-        // 5. Build the new tensor wrapper with the correct Autograd initialization
         Tensor::new(new_data, new_shape).unwrap()
     }
 
     pub fn sub_scalar(&self, scalar: T) -> Self
     where
-        T: num_traits::Float, // Kept your Float bound
+        T: num_traits::Float,
     {
-        // 1. Acquire the read lock
         let inner = self.inner.read().unwrap();
 
-        // 2. Iterate over references instead of consuming the vector
         let new_data: Vec<T> = inner.data.iter().map(|&a| scalar - a).collect();
 
-        // 3. Clone the shape before we drop the lock
         let new_shape = inner.shape.clone();
 
-        // 4. Drop the lock as early as possible
         drop(inner);
 
-        // 5. Use the constructor to properly initialize the Arc and Autograd fields
         Tensor::new(new_data, new_shape).unwrap()
+    }
+}
+
+impl<T> std::ops::Neg for Tensor<T>
+where
+    T: TensorType,
+{
+    type Output = Tensor<T>;
+
+    fn neg(self) -> Self::Output {
+        let parent = self.inner.read().unwrap();
+        let new_data = parent.data.iter().map(|a| -*a).collect();
+
+        let backward_node = NegBackward { a: self.clone() };
+
+        Tensor {
+            inner: Arc::new(RwLock::new(TensorInner {
+                data: new_data,
+                grad: None,
+                shape: parent.shape.clone(),
+                strides: parent.strides.clone(),
+                requires_grad: parent.requires_grad,
+                grad_fn: Some(Arc::new(backward_node)),
+            })),
+        }
     }
 }
 

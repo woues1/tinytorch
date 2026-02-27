@@ -35,7 +35,24 @@ impl<T> BackwardOp<T> for SubBackward<T>
 where
     T: TensorType,
 {
-    fn backward(&self, grad_output: &Tensor<T>) {}
+    fn backward(&self, grad_output: &Tensor<T>) {
+        let grad_for_a = grad_output.clone();
+        let grad_for_b = -grad_output.clone();
+
+        let mut inner_a = self.a.inner.write().unwrap();
+        if let Some(existing_grad) = &inner_a.grad {
+            inner_a.grad = Some(existing_grad.clone() + grad_for_a.clone());
+        } else {
+            inner_a.grad = Some(grad_for_a);
+        }
+
+        let mut inner_b = self.b.inner.write().unwrap();
+        if let Some(existing_grad) = &inner_b.grad {
+            inner_b.grad = Some(existing_grad.clone() + grad_for_b.clone());
+        } else {
+            inner_b.grad = Some(grad_for_b);
+        }
+    }
 }
 
 pub struct DivBackward<T> {
@@ -58,24 +75,42 @@ where
     T: TensorType,
 {
     fn backward(&self, grad_output: &Tensor<T>) {
-        // 1. Calculate the local gradients using the chain rule
         let grad_for_a = grad_output.clone() * self.b.clone();
         let grad_for_b = grad_output.clone() * self.a.clone();
 
-        // 2. Accumulate gradient for parent 'a'
         let mut inner_a = self.a.inner.write().unwrap();
+
         if let Some(existing_grad) = &inner_a.grad {
             inner_a.grad = Some(existing_grad.clone() + grad_for_a.clone());
         } else {
             inner_a.grad = Some(grad_for_a.clone());
         }
 
-        // 3. Accumulate gradient for parent 'b'
         let mut inner_b = self.b.inner.write().unwrap();
+
         if let Some(existing_grad) = &inner_b.grad {
             inner_b.grad = Some(existing_grad.clone() + grad_for_b.clone());
         } else {
             inner_b.grad = Some(grad_for_b.clone());
+        }
+    }
+}
+pub struct NegBackward<T> {
+    pub a: Tensor<T>,
+}
+impl<T> BackwardOp<T> for NegBackward<T>
+where
+    T: TensorType,
+{
+    fn backward(&self, grad_output: &Tensor<T>) {
+        let mut inner_a = self.a.inner.write().unwrap();
+
+        let grad_for_a = -grad_output.clone();
+
+        if let Some(existing_grad) = &inner_a.grad {
+            inner_a.grad = Some(existing_grad.clone() + grad_for_a.clone())
+        } else {
+            inner_a.grad = Some(grad_for_a)
         }
     }
 }
