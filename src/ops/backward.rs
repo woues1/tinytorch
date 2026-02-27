@@ -63,7 +63,28 @@ impl<T> BackwardOp<T> for DivBackward<T>
 where
     T: TensorType,
 {
-    fn backward(&self, grad_output: &Tensor<T>) {}
+    fn backward(&self, grad_output: &Tensor<T>) {
+        let grad_for_a = grad_output.clone() / self.b.clone();
+
+        let grad_for_b =
+            -(grad_output.clone() * self.a.clone() / (self.b.clone() * self.b.clone()));
+
+        let mut inner_a = self.a.inner.write().unwrap();
+
+        if let Some(existing_grad) = &inner_a.grad {
+            inner_a.grad = Some(existing_grad.clone() + grad_for_a.clone())
+        } else {
+            inner_a.grad = Some(grad_for_a)
+        }
+
+        let mut inner_b = self.b.inner.write().unwrap();
+
+        if let Some(existing_grad) = &inner_b.grad {
+            inner_b.grad = Some(existing_grad.clone() + grad_for_b.clone())
+        } else {
+            inner_b.grad = Some(grad_for_b)
+        }
+    }
 }
 
 pub struct MulBackward<T> {
