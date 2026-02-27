@@ -11,7 +11,8 @@ mod tests {
         let result = tensor.gelu();
 
         println!("\n=== GELU Outputs ===");
-        println!("{:?}", result.data);
+        let result_inner = result.inner.read().unwrap();
+        println!("{:?}", result_inner.data);
 
         // Expected approximate values:
         // GELU(-3) ≈ -0.004
@@ -20,8 +21,8 @@ mod tests {
         // GELU(1)  ≈ 0.841
         // GELU(3)  ≈ 2.996
 
-        assert!((result.data[2] - 0.0).abs() < 1e-4); // 0 stays 0
-        assert!(result.data[1] < 0.0); // -1.0 dips slightly negative
-        assert!(result.data[3] > 0.8 && result.data[3] < 0.9); // 1.0 scales up
+        assert!((result_inner.data[2] - 0.0).abs() < 1e-4); // 0 stays 0
+        assert!(result_inner.data[1] < 0.0); // -1.0 dips slightly negative
+        assert!(result_inner.data[3] > 0.8 && result_inner.data[3] < 0.9); // 1.0 scales up
     }
 }

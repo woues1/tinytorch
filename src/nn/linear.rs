@@ -2,7 +2,7 @@ use num_traits::{Float, FromPrimitive};
 use rand_distr::StandardNormal;
 
 use crate::nn::layer::Layer;
-use crate::tensor::tensor::Tensor;
+use crate::tensor::tensor::{Tensor, TensorType};
 
 pub struct Linear<T> {
     pub weight: Tensor<T>,
@@ -39,11 +39,11 @@ where
 
 impl<T> Layer<T> for Linear<T>
 where
-    T: Copy + Default + std::ops::Mul<Output = T> + std::ops::Add<Output = T>,
+    T: Copy + Default + std::ops::Mul<Output = T> + std::ops::Add<Output = T> + TensorType,
 {
     fn forward(&self, input: &Tensor<T>, _is_training: bool) -> Tensor<T> {
         // x @ W
-        let mut output = input.clone().matmul(self.weight.clone());
+        let mut output = input.matmul(&self.weight);
 
         if let Some(bias) = &self.bias {
             output = output + bias.clone();
@@ -53,11 +53,13 @@ where
     }
 
     fn parameters(&self) -> Vec<Tensor<T>> {
-        let mut params = Vec::new();
+        let mut params = Vec::with_capacity(2);
+
         params.push(self.weight.clone());
         if let Some(b) = &self.bias {
             params.push(b.clone());
         }
+
         params
     }
 }

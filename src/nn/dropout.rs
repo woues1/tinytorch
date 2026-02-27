@@ -19,7 +19,10 @@ impl Layer<f32> for Dropout {
         let scale = 1.0 / keep_probability;
         let mut rng = rand::rng();
 
-        let new_data = input
+        let inner = input.inner.read().unwrap();
+        let new_shape = inner.shape.clone();
+
+        let new_data = inner
             .data
             .iter()
             .map(|a| {
@@ -30,8 +33,8 @@ impl Layer<f32> for Dropout {
                 }
             })
             .collect();
-
-        Tensor::new(new_data, input.shape.clone()).unwrap()
+        drop(inner);
+        Tensor::new(new_data, new_shape).unwrap()
     }
 
     /// Dropout has no learnable weights

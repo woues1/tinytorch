@@ -1,4 +1,5 @@
-use crate::tensor::Tensor;
+use crate::tensor::{Tensor, tensor::TensorType};
+use num_traits::Float;
 pub struct MSELoss;
 
 impl MSELoss {
@@ -6,22 +7,25 @@ impl MSELoss {
         Self
     }
 
-    pub fn forward(&self, predictions: &Tensor<f32>, targets: &Tensor<f32>) -> f32 {
-        mse_loss(predictions, targets)
+    pub fn forward<T>(&self, predictions: &Tensor<T>, targets: &Tensor<T>) -> T
+    where
+        T: Float + num_traits::FromPrimitive + std::ops::AddAssign + Default + TensorType,
+    {
+        let p_shape = { predictions.inner.read().unwrap().shape.clone() };
+        let t_shape = { targets.inner.read().unwrap().shape.clone() };
+
+        assert_eq!(
+            p_shape, t_shape,
+            "Predictions and targets must have the same shape for MSE"
+        );
+
+        let n_elements = predictions.size();
+        let n = T::from_usize(n_elements).unwrap();
+
+        let diff = predictions.clone() - targets.clone();
+        let squared = diff.clone() * diff;
+        let sum = squared.sum_all();
+
+        sum / n
     }
-}
-
-pub fn mse_loss(predictions: &Tensor<f32>, targets: &Tensor<f32>) -> f32 {
-    assert_eq!(
-        predictions.shape, targets.shape,
-        "Predictions and targets must have the same shape for MSE"
-    );
-
-    let n = predictions.shape.iter().product::<usize>() as f32;
-
-    let diff = predictions.clone() - targets.clone();
-    let squared = diff.clone() * diff;
-    let sum = squared.sum_all();
-
-    sum / n
 }

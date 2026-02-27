@@ -3,6 +3,7 @@ pub mod macros;
 pub mod activations;
 pub mod losses;
 pub mod nn;
+pub mod ops;
 pub mod tensor;
 
 #[cfg(test)]

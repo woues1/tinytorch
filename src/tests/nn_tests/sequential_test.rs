@@ -25,12 +25,15 @@ mod tests {
         // 3. Test Inference Pass (Dropout inactive)
         let out_eval = model.forward(&input, false);
 
-        assert_eq!(out_train.shape, vec![1, 2]);
-        assert_eq!(out_eval.shape, vec![1, 2]);
+        let out_train_inner = out_train.inner.read().unwrap();
+        let out_eval_inner = out_eval.inner.read().unwrap();
+
+        assert_eq!(out_train_inner.shape, vec![1, 2]);
+        assert_eq!(out_eval_inner.shape, vec![1, 2]);
 
         // In theory, out_train and out_eval should be different
         // because Dropout was randomly zeroing things in the first one!
-        println!("Training output: {:?}", out_train.data);
-        println!("Eval output: {:?}", out_eval.data);
+        println!("Training output: {:?}", out_train_inner.data);
+        println!("Eval output: {:?}", out_eval_inner.data);
     }
 }

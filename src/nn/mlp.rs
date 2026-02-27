@@ -1,8 +1,8 @@
 use std::ops::AddAssign;
 
-use crate::nn::Linear;
 use crate::nn::layer::Layer; // 1. IMPORTANT: Must bring Trait into scope to use .forward()
 use crate::tensor::tensor::Tensor;
+use crate::{nn::Linear, tensor::tensor::TensorType};
 use num_traits::{Float, FromPrimitive};
 use rand_distr::StandardNormal;
 
@@ -44,7 +44,10 @@ where
     }
 
     // 4. Input and Output must be Tensor<T>, not Tensor<f32>
-    pub fn forward(&self, input: &Tensor<T>) -> Tensor<T> {
+    pub fn forward(&self, input: &Tensor<T>) -> Tensor<T>
+    where
+        T: TensorType,
+    {
         let mut current = input.clone();
         let total_layers = self.layers.len();
 

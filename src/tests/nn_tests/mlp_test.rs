@@ -25,11 +25,13 @@ mod tests {
         let predictions = model.forward(&input);
 
         println!("\n=== Deep MLP Forward Pass ===");
-        println!("Input Shape:       {:?}", input.shape);
+        let input_inner = input.inner.read().unwrap();
+        let pred_inner = predictions.inner.read().unwrap();
+        println!("Input Shape:       {:?}", input_inner.shape);
         println!("Total Layers:      {}", model.layers.len());
-        println!("Final Output Shape:{:?}", predictions.shape);
+        println!("Final Output Shape:{:?}", pred_inner.shape);
 
         // The final shape should still perfectly resolve to [4, 2]
-        assert_eq!(predictions.shape, vec![4, 2]);
+        assert_eq!(pred_inner.shape, vec![4, 2]);
     }
 }

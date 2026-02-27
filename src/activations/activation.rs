@@ -1,6 +1,6 @@
-use crate::nn::layer::Layer;
 use crate::tensor::Tensor;
-use num_traits::{Float, FromPrimitive, real::Real};
+use crate::{nn::layer::Layer, tensor::tensor::TensorType};
+use num_traits::{Float, FromPrimitive};
 use std::ops::AddAssign;
 
 pub enum Activation {
@@ -14,8 +14,7 @@ pub enum Activation {
 
 impl<T> Layer<T> for Activation
 where
-    T: Float + FromPrimitive + AddAssign + Default,
-    Tensor<T>: Real,
+    T: Float + FromPrimitive + AddAssign + Default + TensorType,
 {
     fn forward(&self, input: &Tensor<T>, _is_training: bool) -> Tensor<T> {
         let t = input.clone();
