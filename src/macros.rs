@@ -3,7 +3,7 @@ macro_rules! impl_elementwise_op {
     ($trait:ident, $method:ident, $op:tt, $backward_op:ident) => {
         impl<T> std::ops::$trait for Tensor<T>
         where
-            T: std::ops::$trait<Output = T> + Copy + Default + TensorType,
+            T: TensorType,
         {
             type Output = Self;
 

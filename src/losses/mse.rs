@@ -1,5 +1,5 @@
 use crate::tensor::{Tensor, tensor::TensorType};
-use num_traits::Float;
+use num_traits::{Float, FromPrimitive};
 pub struct MSELoss;
 
 impl MSELoss {
@@ -9,7 +9,7 @@ impl MSELoss {
 
     pub fn forward<T>(&self, predictions: &Tensor<T>, targets: &Tensor<T>) -> T
     where
-        T: Float + num_traits::FromPrimitive + std::ops::AddAssign + Default + TensorType,
+        T: Float + FromPrimitive + TensorType,
     {
         let p_shape = { predictions.inner.read().unwrap().shape.clone() };
         let t_shape = { targets.inner.read().unwrap().shape.clone() };

@@ -13,13 +13,7 @@ pub struct MLP<T> {
 impl<T> MLP<T>
 where
     // 2. Add bounds so T can handle the math and initialization
-    T: Float
-        + FromPrimitive
-        + From<f32>
-        + Default
-        + std::ops::Add<Output = T>
-        + std::ops::Mul<Output = T>
-        + AddAssign,
+    T: Float + FromPrimitive + From<f32> + AddAssign + TensorType,
     StandardNormal: rand_distr::Distribution<T>,
 {
     pub fn new(sizes: &[usize]) -> Self

@@ -10,7 +10,7 @@ impl BinaryCrossEntropy {
 
     pub fn forward<T>(&self, predictions: &Tensor<T>, targets: &Tensor<T>) -> T
     where
-        T: Float + FromPrimitive + std::ops::AddAssign + Default + TensorType,
+        T: Float + FromPrimitive + TensorType,
     {
         let first_term = targets.clone() * predictions.clone().ln();
 

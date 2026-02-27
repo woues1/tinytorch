@@ -10,7 +10,7 @@ impl CrossEntropyLoss {
 
     pub fn forward<T>(&self, predictions: &Tensor<T>, targets: &Tensor<T>) -> T
     where
-        T: Float + FromPrimitive + std::ops::AddAssign + Default + TensorType,
+        T: Float + FromPrimitive + std::ops::AddAssign + TensorType,
     {
         // 1. Apply log_softmax along the class dimension (usually dim 1)
         let log_probs = predictions.log_softmax(1);

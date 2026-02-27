@@ -5,7 +5,7 @@ use num_traits::{Float, FromPrimitive};
 
 impl<T> Tensor<T>
 where
-    T: Float + FromPrimitive + AddAssign + Default,
+    T: Float + FromPrimitive + AddAssign + TensorType,
 {
     pub fn relu(&self) -> Self {
         let zero = T::zero();
@@ -20,6 +20,7 @@ where
 
         Tensor::new(new_data, new_shape).unwrap()
     }
+
     pub fn sigmoid(&self) -> Self {
         let one = T::one();
 
@@ -50,10 +51,7 @@ where
         Tensor::new(new_data, new_shape).unwrap()
     }
 
-    pub fn softmax(&self, dim: usize) -> Self
-    where
-        T: TensorType,
-    {
+    pub fn softmax(&self, dim: usize) -> Self {
         let max_vals = self.max_dim(dim);
 
         let shifted = self.clone() - max_vals;
@@ -65,10 +63,7 @@ where
         exp_vals / sum_exp
     }
 
-    pub fn log_softmax(&self, dim: usize) -> Self
-    where
-        T: TensorType,
-    {
+    pub fn log_softmax(&self, dim: usize) -> Self {
         let max_vals = self.max_dim(dim);
         let shifted = self.clone() - max_vals;
 

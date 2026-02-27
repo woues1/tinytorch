@@ -14,7 +14,7 @@ pub enum Activation {
 
 impl<T> Layer<T> for Activation
 where
-    T: Float + FromPrimitive + AddAssign + Default + TensorType,
+    T: Float + FromPrimitive + AddAssign + TensorType,
 {
     fn forward(&self, input: &Tensor<T>, _is_training: bool) -> Tensor<T> {
         let t = input.clone();

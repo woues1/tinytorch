@@ -9,13 +9,35 @@ pub struct TensorInner<T> {
     pub shape: Vec<usize>,
     pub strides: Vec<usize>,
     pub requires_grad: bool,
-    pub grad: Option<Vec<T>>, // Stores the accumulated gradient
+    pub grad: Option<Tensor<T>>, // Stores the accumulated gradient
     pub grad_fn: Option<Arc<dyn BackwardOp<T>>>, // The operation that made this
 }
 
-pub trait TensorType: Copy + Default + Send + Sync + 'static {}
+pub trait TensorType:
+    Copy
+    + Default
+    + Send
+    + Sync
+    + std::ops::Add<Output = Self>
+    + std::ops::Sub<Output = Self>
+    + std::ops::Mul<Output = Self>
+    + std::ops::Div<Output = Self>
+    + 'static
+{
+}
 
-impl<T> TensorType for T where T: Copy + Default + Send + Sync + 'static {}
+impl<T> TensorType for T where
+    T: Copy
+        + Default
+        + Send
+        + Sync
+        + std::ops::Add<Output = Self>
+        + std::ops::Sub<Output = Self>
+        + std::ops::Mul<Output = Self>
+        + std::ops::Div<Output = Self>
+        + 'static
+{
+}
 
 // 3. The Public Wrapper
 #[derive(Clone)]
@@ -72,9 +94,9 @@ impl<T> Tensor<T> {
 
         let shape_a = inner_self.shape.iter().rev().chain(std::iter::repeat(&1));
 
-        let shape_b = inner_other.shape.iter().rev().chain(std::iter::repeat(&1));
-
         let stride_a = inner_self.strides.iter().rev().chain(std::iter::repeat(&0));
+
+        let shape_b = inner_other.shape.iter().rev().chain(std::iter::repeat(&1));
 
         let stride_b = inner_other
             .strides

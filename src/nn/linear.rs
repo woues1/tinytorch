@@ -11,7 +11,7 @@ pub struct Linear<T> {
 
 impl<T> Linear<T>
 where
-    T: Copy + Default + From<f32> + std::ops::Mul<Output = T> + std::ops::Add<Output = T>,
+    T: From<f32> + TensorType,
     T: Float + FromPrimitive,
     StandardNormal: rand_distr::Distribution<T>,
 {
@@ -39,7 +39,7 @@ where
 
 impl<T> Layer<T> for Linear<T>
 where
-    T: Copy + Default + std::ops::Mul<Output = T> + std::ops::Add<Output = T> + TensorType,
+    T: TensorType,
 {
     fn forward(&self, input: &Tensor<T>, _is_training: bool) -> Tensor<T> {
         // x @ W
